@@ -3,9 +3,10 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import TEXT, UUID, ForeignKey
 from pgvector.sqlalchemy import Vector
 import uuid
-from src.entities.base import Base
-from src.entities.rag.chunk_metadata import ChunkMetaData
-from src.entities.mixins.jsonb_metadata import JsonbMetadataMixin
+
+from src.database.entities.rag.chunk_metadata import ChunkMetaData
+from src.database.entities.mixins.jsonb_metadata import JsonbMetadataMixin
+from src.database.entities.base import Base
 
 class Chunk(Base, JsonbMetadataMixin[ChunkMetaData]):
     __tablename__ = 'chunks'

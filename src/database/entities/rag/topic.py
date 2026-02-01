@@ -5,7 +5,7 @@ from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy import UUID, func
 import uuid
 
-from src.entities.base import Base
+from src.database.entities.base import Base
 
 class Topic(Base):
     __tablename__ = "topics"
