@@ -5,8 +5,8 @@ import uuid
 from datetime import datetime
 from sqlalchemy import func
 
-from entities.base import Base
-from entities.rag.message_role import MessageRole
+from src.entities.base import Base
+from src.entities.rag.message_role import MessageRole
 
 class Message(Base):
     __tablename__ = 'messages'

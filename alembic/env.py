@@ -5,13 +5,15 @@ from sqlalchemy import pool
 
 from alembic import context
 
-# Alembic's prepend_sys_path in alembic.ini adds `src/` to sys.path,
-# so `entities` is importable as a top-level package.
-from entities import Base  # also imports models (see entities/__init__.py)
+from src.core import settings
+from src.entities.base import Base
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
 config = context.config
+
+if not settings.database.DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set")
+
+config.set_main_option("sqlalchemy.url", settings.database.DATABASE_URL)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

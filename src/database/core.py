@@ -3,12 +3,10 @@ from sqlalchemy import create_engine
 from fastapi import Depends
 from typing import Annotated
 from sqlalchemy.orm import sessionmaker, Session
-import os
-load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+from core import settings
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(settings.DatabaseSettings.DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
