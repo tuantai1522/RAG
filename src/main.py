@@ -1,16 +1,15 @@
 from fastapi import FastAPI
 
+from src.api.v1.rag import rag
 from src.core.logging import configure_logging
 
 configure_logging()
 
 app = FastAPI()
 
-@app.get("/")
-async def root():
-    return "Hello World !"
+app.include_router(
+    rag.router,
+    prefix="/api",         
+    tags=["documents"],     
+)
 
-
-@app.get("/123")
-async def root():
-    return "Hello World123 !"

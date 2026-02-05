@@ -1,12 +1,11 @@
-from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from fastapi import Depends
 from typing import Annotated
 from sqlalchemy.orm import sessionmaker, Session
 
-from core import settings
+from src.core import settings
 
-engine = create_engine(settings.DatabaseSettings.DATABASE_URL)
+engine = create_engine(settings.database.DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

@@ -38,6 +38,6 @@ class Chunk(Base, JsonbMetadataMixin[ChunkMetaData]):
     text: Mapped[str] = mapped_column(TEXT, nullable=False)
 
     embeddings: Mapped[list[float]] = mapped_column(
-        Vector(1536),
+        Vector(768),
         nullable=False
     )
