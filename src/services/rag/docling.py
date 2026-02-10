@@ -7,13 +7,13 @@ from docling.datamodel.pipeline_options import (
     PdfPipelineOptions,
     PictureDescriptionApiOptions,
     TableFormerMode,
+    TableStructureOptions,
+    RapidOcrOptions,
 )
+
 from transformers import AutoTokenizer
 from docling_core.transforms.chunker.tokenizer.huggingface import HuggingFaceTokenizer
-from docling.datamodel.pipeline_options import (
-    PdfPipelineOptions,
-    TableStructureOptions,
-)
+
 from docling.backend.pypdfium2_backend import PyPdfiumDocumentBackend
 
 from src.core import settings
@@ -25,18 +25,21 @@ class DoclingService:
                 InputFormat.PDF: PdfFormatOption(
                     pipeline_options=self._create_pdf_pipeline_options(),
                     backend=PyPdfiumDocumentBackend
+                ),
+                InputFormat.IMAGE: ImageFormatOption(
+                    pipeline_options=self._create_image_pipeline_options(),
                 )
             }
         )
 
         self.chunker = HybridChunker(
             tokenizer = HuggingFaceTokenizer(
-                tokenizer = AutoTokenizer.from_pretrained(settings.docling.TOKEN_MODEL_ID)
+                tokenizer = AutoTokenizer.from_pretrained(settings.docling.TOKEN_MODEL_ID),
             ),
             merge_peers=True,
         )
 
-    def get_chunks_by_link_url(self, link_url: str):
+    def get_chunks_by_link_url(self, link_url: str, file_name: str):
         # 1. Get content in source
         doc = self.converter.convert(link_url).document
 
@@ -48,7 +51,7 @@ class DoclingService:
             {
                 "text": chunk.text,
                 "metadata": {
-                    "file_name": chunk.meta.origin.filename,
+                    "file_name": file_name,
                     "page_numbers": [
                         page_no
                         for page_no in sorted(
@@ -75,7 +78,7 @@ class DoclingService:
                 seed=42,
                 max_completion_tokens=256,
             ),
-            prompt="Describe the image in three sentences. Be consise and accurate.",
+            prompt="Describe the image in three sentences. Be concise and accurate.",
             timeout=250
         )
     
@@ -83,13 +86,31 @@ class DoclingService:
         return PdfPipelineOptions(
             enable_remote_services=True,
 
-            do_ocr=False,
+            do_ocr=True,
+            ocr_options=RapidOcrOptions(
+                backend="torch"
+            ),
 
             do_table_structure=True,
 
             table_structure_options=TableStructureOptions(
                 mode=TableFormerMode.ACCURATE,
                 do_cell_matching=True
+            ),
+
+            generate_picture_images=True,
+            do_picture_description=True,
+            picture_description_options=self._create_picture_description_options(),
+
+        )
+        
+    def _create_image_pipeline_options(self) -> PdfPipelineOptions:
+        return PdfPipelineOptions(
+            enable_remote_services=True,
+
+            do_ocr=True,
+            ocr_options=RapidOcrOptions(
+                backend="torch"
             ),
 
             generate_picture_images=True,

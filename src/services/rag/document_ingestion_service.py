@@ -30,33 +30,34 @@ class DocumentIngestionService:
         )
 
         # 2. Get chunks
-        chunks = self.docling.get_chunks_by_link_url(file_path)
+        chunks = self.docling.get_chunks_by_link_url(file_path, request.filename)
 
-        # 3. Get embeddings
-        texts = [chunk["text"] for chunk in chunks]
-        vectors = self.embeddings.embed(texts)
+        # 3. Only embeddings if len chunk is larger than 0
+        if len(chunks) > 0:
+            texts = [chunk["text"] for chunk in chunks]
 
+            vectors = self.embeddings.embed(texts)
 
-        # 4. Add new record in db
-        TEST_TOPIC_ID = UUID("791b82c7-233e-47d5-a119-d657e1b3d239")
+            # 4. Add new record in db
+            TEST_TOPIC_ID = UUID("791b82c7-233e-47d5-a119-d657e1b3d239")
 
-        for i in range(len(chunks)):
-            new_chunk = Chunk(
-                text = chunks[i]["text"],
-                topic_id=TEST_TOPIC_ID,
+            for i in range(len(chunks)):
+                new_chunk = Chunk(
+                    text = chunks[i]["text"],
+                    topic_id=TEST_TOPIC_ID,
 
-                embeddings = vectors[i],
-                attributes = ChunkMetaData(
-                    file_name = chunks[i]["metadata"]["file_name"],
-                    page_numbers = chunks[i]["metadata"]["page_numbers"],
-                    title = chunks[i]["metadata"]["title"],
-                ).model_dump()
-            )
-            
-            self.db.add(new_chunk)
+                    embeddings = vectors[i],
+                    attributes = ChunkMetaData(
+                        file_name = chunks[i]["metadata"]["file_name"],
+                        page_numbers = chunks[i]["metadata"]["page_numbers"],
+                        title = chunks[i]["metadata"]["title"],
+                    ).model_dump()
+                )
 
-        # Commit the changes to the database
-        self.db.commit()
+                self.db.add(new_chunk)
+
+            # Commit the changes to the database
+            self.db.commit()
 
         return DocumentIngestionResponse(
             file_path=file_path,
